@@ -1,48 +1,67 @@
 <script setup>
-import { ref } from 'vue';
-const count  = ref(0);
-const movieName = ref("");
-const increment = () => {
-  count.value++ ; 
-}
-const decrement = () => {
-  count.value-- ; 
-}
-const delete_movie = (movie) => {
-  movies.value = movies.value.filter(m => m != movie );
-}
-const addMovie = () => {
-  movies.value.push(movieName.value);
-  movieName.value = ""
+import { ref } from 'vue'
+const taskName = ref('')
+const hideCompleted = ref(false);
+
+const addTask = () => {
+  tasks.value.push({
+    title: taskName.value,
+    completed: false,
+    date: Date.now(),
+  })
+  taskName.value = ''
 }
 
+const sortedTask = () => {
+  const sortedTask =  tasks.value.toSorted((a,b) => a.completed > b.completed ? 1 : -1 );
+  if(hideCompleted.value === true){
+    return sortedTask.filter(t => t.completed === false);
+  }
+  return sortedTask ; 
+}
 
-const movies = ref([
-  'Matrix',
-   ' Fantastic ',
-   'Alice'
-]);
+const tasks = ref([
+  {
+    title:'Task 1',
+    completed: false,
+    date: 1
+  },
+  {
+    title:'Task 2',
+    completed: true,
+    date: 2
+  }
 
+])
 </script>
 
 <template>
   <h1>You did it!</h1>
-  <p>
-     Compteur : {{ count }}
-  </p>
-  <p v-if="count >=5" :style="{color: count >= 5 ? 'red' : 'green' }" >Vous avez cliqué 5 fois </p>
-  <button @click="increment">Incrémenter</button>
-  <button @click="decrement">Décrémenter</button>
-  
-  <ul>
-    <li v-for="movie in movies" :key="movie">
-      {{ movie }} <button @click="delete_movie(movie)">supp</button>
-    </li>
-  </ul>
-  <form action="" @submit.prevent="addMovie">
-   <input type="text" placeholder="Nouveau Film" v-model="movieName">
-  <button @click="decrement">Nouveau Film</button>
+  <p>Task Management</p>
+  <form action="" @submit.prevent="addTask">
+    <input type="text" placeholder="New Task" v-model="taskName" />
+    <button @click="decrement" :disabled="taskName.length === 0">Add</button>
   </form>
+  <!-- <p v-if="count >=5" :style="{color: count >= 5 ? 'red' : 'green' }" >Vous avez cliqué 5 fois </p> -->
+  <p v-if="tasks.length === 0">Empty</p>
+  <div v-else="tasks.length > 0">
+    <ul>
+      <li v-for="task in sortedTask()" :key="task.date" :class="{completed: task.completed }"> 
+      <label for="">
+        <input type="checkbox" v-model="task.completed">
+        {{ task.title }}
+      </label>
+      </li>
+    </ul>
+    <label for="">
+      <input type="checkbox" v-model="hideCompleted">
+      Hide completed task ?
+    </label>
+  </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+  .completed{
+    text-decoration: line-through;
+  }
+</style>
