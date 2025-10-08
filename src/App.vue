@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 const taskName = ref('')
 const hideCompleted = ref(false);
 
@@ -12,13 +12,17 @@ const addTask = () => {
   taskName.value = ''
 }
 
-const sortedTask = () => {
+const sortedTask = computed(() => {
   const sortedTask =  tasks.value.toSorted((a,b) => a.completed > b.completed ? 1 : -1 );
   if(hideCompleted.value === true){
     return sortedTask.filter(t => t.completed === false);
   }
   return sortedTask ; 
-}
+})
+
+const remainingTask = computed(() => {
+  return tasks.value.filter(t => t.completed === false).length;
+})
 
 const tasks = ref([
   {
@@ -46,7 +50,7 @@ const tasks = ref([
   <p v-if="tasks.length === 0">Empty</p>
   <div v-else="tasks.length > 0">
     <ul>
-      <li v-for="task in sortedTask()" :key="task.date" :class="{completed: task.completed }"> 
+      <li v-for="task in sortedTask" :key="task.date" :class="{completed: task.completed }"> 
       <label for="">
         <input type="checkbox" v-model="task.completed">
         {{ task.title }}
@@ -57,6 +61,7 @@ const tasks = ref([
       <input type="checkbox" v-model="hideCompleted">
       Hide completed task ?
     </label>
+    <p v-if="remainingTask > 0">{{ remainingTask }} tache{{ remainingTask > 1 ? 's' : '' }} à faire</p>
   </div>
 </template>
 
